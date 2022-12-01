@@ -1,3 +1,5 @@
+// https://adventofcode.com/2022/day/1
+
 const std = @import("std");
 const input = @embedFile("input.txt");
 const print = std.debug.print;
