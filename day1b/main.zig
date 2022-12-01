@@ -22,6 +22,6 @@ pub fn main() !void {
     }
 
     var res = calories_per_elf.toOwnedSlice();
-    std.sort.sort(u32, res, {}, std.sort.asc(u32));
-    print("Sum: {d}\n", .{res[res.len - 1] + res[res.len - 2] + res[res.len - 3]});
+    std.sort.sort(u32, res, {}, std.sort.desc(u32));
+    print("Sum: {d}\n", .{res[0] + res[1] + res[2]});
 }
