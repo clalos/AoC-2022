@@ -6,7 +6,7 @@ const input = @embedFile("input.txt");
 const print = std.debug.print;
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     var stacks = std.AutoHashMap(usize, ArrayList(u8)).init(gpa.allocator());
 
     var lines = std.mem.split(u8, input, "\n");
@@ -48,9 +48,9 @@ pub fn main() !void {
 
         var from_stack = stacks.get(from).?;
         var to_stack = stacks.get(to).?;
-        while (quantity > 0) : (quantity -= 1) {
-            try to_stack.append(from_stack.pop());
-        }
+        try to_stack.appendSlice(from_stack.items[from_stack.items.len-quantity..]);
+        from_stack.shrinkAndFree(from_stack.items.len-quantity);
+        
         try stacks.put(from, from_stack);
         try stacks.put(to, to_stack);
     }
