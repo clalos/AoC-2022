@@ -20,24 +20,14 @@ pub fn main() !void {
         var from = try std.fmt.parseUnsigned(u32, step_parts.next().?, 10);
         _ = step_parts.next().?; // to
         var to = try std.fmt.parseUnsigned(u32, step_parts.next().?, 10);
-        print("quantity {} from {} to {}\n", .{ quantity, from, to });
 
         var from_stack = stacks.get(from).?;
-        print("from_stack {u}\n", .{from_stack.items});
         var to_stack = stacks.get(to).?;
-        print("to_stack {u}\n", .{to_stack.items});
         while (quantity > 0) : (quantity -= 1) {
-            print("quanity {d}\n", .{quantity});
             try to_stack.append(from_stack.pop());
         }
         try stacks.put(from, from_stack);
         try stacks.put(to, to_stack);
-
-        // Remove
-        print("---------------\n", .{});
-        print("{s}\n", .{stacks.get(1).?.items});
-        print("{s}\n", .{stacks.get(2).?.items});
-        print("{s}\n", .{stacks.get(3).?.items});
     }
 
     var i: u32 = 1;
@@ -76,16 +66,6 @@ fn loadInput() !std.AutoHashMap(usize, ArrayList(u8)) {
     while (iterator.next()) |entry| {
         std.mem.reverse(u8, entry.value_ptr.items);
     }
-
-    print("{u}\n", .{stacks.get(1).?.items});
-    print("{u}\n", .{stacks.get(2).?.items});
-    print("{u}\n", .{stacks.get(3).?.items});
-    print("{u}\n", .{stacks.get(4).?.items});
-    print("{u}\n", .{stacks.get(5).?.items});
-    print("{u}\n", .{stacks.get(6).?.items});
-    print("{u}\n", .{stacks.get(7).?.items});
-    print("{u}\n", .{stacks.get(8).?.items});
-    print("{u}\n", .{stacks.get(9).?.items});
 
     return stacks;
 }
