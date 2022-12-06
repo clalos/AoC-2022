@@ -9,6 +9,7 @@ const marker_size = 14;
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     var unique_chars = std.AutoHashMap(u8, void).init(gpa.allocator());
+    defer unique_chars.deinit();
 
     var idx: u32 = marker_size;
     while (idx < input.len) : (idx += 1) {

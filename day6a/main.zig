@@ -8,6 +8,7 @@ const print = std.debug.print;
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     var unique_chars = std.AutoHashMap(u8, void).init(gpa.allocator());
+    defer unique_chars.deinit();
 
     var idx: u32 = 4;
     while (idx < input.len) : (idx += 1) {
