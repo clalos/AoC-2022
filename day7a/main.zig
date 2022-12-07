@@ -31,89 +31,86 @@ pub fn main() !void {
 
     var lines = std.mem.split(u8, input, "\n");
     while (lines.next()) |line| {
-        switch (line[0]) {
-            '$' => {
-                var command_parts = std.mem.split(u8, line, " ");
-                _ = command_parts.next().?;
-                var command_name = command_parts.next().?;
+        if (line[0] == '$') {
+            var command_parts = std.mem.split(u8, line, " ");
+            _ = command_parts.next().?;
+            var command_name = command_parts.next().?;
 
-                is_ls = std.mem.eql(u8, command_name, "ls");
-                if (is_ls) continue;
+            is_ls = std.mem.eql(u8, command_name, "ls");
+            if (is_ls) continue;
 
-                var command_param = command_parts.next().?;
-                if (std.mem.eql(u8, command_param, "/")) {
-                    cur_dir = &root;
-                    continue;
+            var command_param = command_parts.next().?;
+            if (std.mem.eql(u8, command_param, "/")) {
+                cur_dir = &root;
+                continue;
+            }
+
+            if (std.mem.eql(u8, command_param, "..")) {
+                // Go to parent
+                cur_dir = cur_dir.parent.?;
+                continue;
+            }
+
+            // Move to folder
+            // 1) check if folder is in the children
+            var found_child = false;
+            for (cur_dir.folders.items) |child, idx| {
+                if (std.mem.eql(u8, child.name, command_param)) {
+                    cur_dir = &cur_dir.folders.items[idx];
+                    found_child = true;
+                    break;
                 }
+            }
+            if (found_child) continue;
 
-                if (std.mem.eql(u8, command_param, "..")) {
-                    // Go to parent
-                    cur_dir = cur_dir.parent.?;
-                    continue;
+            // 2) if not a child, add folder to the children and move to it
+            try cur_dir.folders.append(Folder{
+                .name = command_param,
+                .parent = cur_dir,
+                .files = ArrayList(File).init(gpa.allocator()),
+                .folders = ArrayList(Folder).init(gpa.allocator()),
+            });
+            cur_dir = &cur_dir.folders.items[cur_dir.folders.items.len - 1];
+            continue;
+        }
+
+        var res_parts = std.mem.split(u8, line, " ");
+        var res_part1 = res_parts.next().?;
+        var res_part2 = res_parts.next().?;
+
+        if (std.mem.eql(u8, res_part1, "dir")) {
+            // Search for dir, if not found create it
+            var found_dir = false;
+            for (cur_dir.folders.items) |folder, idx| {
+                if (std.mem.eql(u8, folder.name, res_part2)) {
+                    cur_dir = &cur_dir.folders.items[idx];
+                    found_dir = true;
+                    break;
                 }
+            }
+            if (found_dir) continue;
 
-                // Move to folder
-                // 1) check if folder is in the children
-                var found_child = false;
-                for (cur_dir.folders.items) |child, idx| {
-                    if (std.mem.eql(u8, child.name, command_param)) {
-                        cur_dir = &cur_dir.folders.items[idx];
-                        found_child = true;
-                        break;
-                    }
+            try cur_dir.folders.append(Folder{
+                .name = res_part2,
+                .parent = cur_dir,
+                .files = ArrayList(File).init(gpa.allocator()),
+                .folders = ArrayList(Folder).init(gpa.allocator()),
+            });
+        } else {
+            // Append file under cur_dir if not exists
+            var file_found = false;
+            for (cur_dir.files.items) |file| {
+                if (std.mem.eql(u8, file.name, res_part2)) {
+                    file_found = true;
+                    break;
                 }
-                if (found_child) continue;
+            }
+            if (file_found) continue;
 
-                // 2) if not a child, add folder to the children and move to it
-                try cur_dir.folders.append(Folder{
-                    .name = command_param,
-                    .parent = cur_dir,
-                    .files = ArrayList(File).init(gpa.allocator()),
-                    .folders = ArrayList(Folder).init(gpa.allocator()),
-                });
-                cur_dir = &cur_dir.folders.items[cur_dir.folders.items.len - 1];
-            },
-            else => {
-                var res_parts = std.mem.split(u8, line, " ");
-                var res_part1 = res_parts.next().?;
-                var res_part2 = res_parts.next().?;
-
-                if (std.mem.eql(u8, res_part1, "dir")) {
-                    // Search for dir, if not found create it
-
-                    var found_dir = false;
-                    for (cur_dir.folders.items) |folder, idx| {
-                        if (std.mem.eql(u8, folder.name, res_part2)) {
-                            cur_dir = &cur_dir.folders.items[idx];
-                            found_dir = true;
-                            break;
-                        }
-                    }
-                    if (found_dir) continue;
-
-                    try cur_dir.folders.append(Folder{
-                        .name = res_part2,
-                        .parent = cur_dir,
-                        .files = ArrayList(File).init(gpa.allocator()),
-                        .folders = ArrayList(Folder).init(gpa.allocator()),
-                    });
-                } else {
-                    // Append file under cur_dir if not exists
-                    var file_found = false;
-                    for (cur_dir.files.items) |file| {
-                        if (std.mem.eql(u8, file.name, res_part2)) {
-                            file_found = true;
-                            break;
-                        }
-                    }
-                    if (file_found) continue;
-
-                    try cur_dir.files.append(File{
-                        .name = res_part2,
-                        .size = try std.fmt.parseUnsigned(u32, res_part1, 10),
-                    });
-                }
-            },
+            try cur_dir.files.append(File{
+                .name = res_part2,
+                .size = try std.fmt.parseUnsigned(u32, res_part1, 10),
+            });
         }
     }
 
