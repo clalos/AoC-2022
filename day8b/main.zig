@@ -20,7 +20,7 @@ pub fn main() !void {
         try grid.append(row);
     }
 
-    var scenic_scores = ArrayList(u32).init(gpa.allocator());
+    var highest_scenic_score: u32 = 0;
     var col: u32 = 1;
     var row: u32 = 1;
     while (row < grid.items.len - 1) : (row += 1) {
@@ -64,11 +64,11 @@ pub fn main() !void {
                 if (tree >= candidate) break;
             }
 
-            try scenic_scores.append(left_score * right_score * top_score * bottom_score);
+            var scenic_score = left_score * right_score * top_score * bottom_score;
+            highest_scenic_score = if (scenic_score > highest_scenic_score) scenic_score else highest_scenic_score;
         }
         col = 1;
     }
 
-    std.sort.sort(u32, scenic_scores.items, {}, std.sort.desc(u32));
-    print("Highest scenic score: {d}\n", .{scenic_scores.items[0]});
+    print("Highest scenic score: {d}\n", .{highest_scenic_score});
 }
