@@ -15,7 +15,8 @@ pub fn main() !void {
     var unique_positions = std.AutoHashMap(Coord, void).init(gpa.allocator());
     defer unique_positions.deinit();
 
-    var snake: [10]Coord = undefined;
+    var snake: [10]Coord = [_]Coord{ Coord{}, Coord{}, Coord{}, Coord{}, Coord{}, Coord{}, Coord{}, Coord{}, Coord{}, Coord{} };
+
     var lines = std.mem.split(u8, input, "\n");
     while (lines.next()) |line| {
         var motion = std.mem.split(u8, line, " ");
